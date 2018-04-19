@@ -6,18 +6,18 @@
             <p class="lead text-muted">Do you really want to delete the deck: {{$deck->name}}</p>
             <p>
 
-            @if (auth()->check())
-                <a class="btn btn-primary" href="#"
-                    onclick="event.preventDefault();
+                @if (auth()->check())
+                    <a class="btn btn-primary" href="#"
+                       onclick="event.preventDefault();
                     document.getElementById('delete-form').submit();">
-                    Delete
-                </a>
+                        Delete
+                    </a>
 
-                <form id="delete-form" action="{{ route( 'destroy' ) }}" method="POST" style="display: none;">
-                    <button type="submit" class="btn btn-primary">Delete</button>{{ csrf_field() }}
-                </form>
+            <form id="delete-form" action="/my_decks/{{$deck->id}}" method="POST" style="display: none;">
+                <button type="submit" class="btn btn-primary">Delete</button>{{ csrf_field() }}{{ method_field('DELETE') }}
+            </form>
 
-                <a class="btn btn-secondary" href="/my_decks">Cancel</a>
+            <a class="btn btn-secondary" href="/my_decks">Cancel</a>
 
             @endif
 

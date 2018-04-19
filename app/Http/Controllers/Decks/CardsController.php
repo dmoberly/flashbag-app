@@ -8,21 +8,13 @@ use App\Models;
 
 class CardsController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+
     public function index()
     {
 
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+
     public function create($deckId)
     {
         $deck = Models\Deck::find($deckId);
@@ -32,59 +24,68 @@ class CardsController extends Controller
         return view('cards.create', compact('deck', 'newCard'));
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-
-    public function show($deckId, $id)
+    public function show($deckId, $cardId)
     {
-        $card = Models\Card::find($id);
+        $card = Models\Card::find($cardId);
 
         $deck = Models\Deck::find($deckId);
 
-        $nextCard = Models\Card::where('deck_id', $deckId)->where('id', '>', $id)->orderBy('id', 'ASC')->first();
+        $nextCard = Models\Card::where('deck_id', $deckId)->where('id', '>', $cardId)->orderBy('id', 'ASC')->first();
 
-        $previousCard = Models\Card::where('deck_id', $deckId)->where('id', '<', $id)->orderBy('id', 'DEC')->first();
+        $previousCard = Models\Card::where('deck_id', $deckId)->where('id', '<', $cardId)->orderBy('id', 'DEC')->first();
 
         return view('cards.show', compact('card', 'deck', 'nextCard', 'previousCard'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
 
-    public function store($deckId, Request $request, $deck)
+    public function toggleReview(Request $request, $deckId, $cardId)
     {
-        $card = new Models\Card;
+        $card = Models\Card::find($cardId);
 
-        $deckId = Models\Deck::find($deckId);
+        $deck = Models\Deck::find($deckId);
 
-        $decks = Models\Deck::all();
 
-        $this->save($card, $request, $deckId, $decks);
 
-        return redirect()->to('/my_decks/' . $deckId . '/cards')->with('success', 'Card was saved.');
+
+
+
+
+
+        //return redirect()->to('/my_decks/' . $deck->id . '/card/' . $card->id)->with(compact($card->id, $card));
+
+
+        //return redirect()->to('/my_decks/' . $deck->id . '/results');
+
+
+
+        return view('decks.toggle-review', compact('deck', 'card'));
+
+
     }
 
 
+    public function store($deckId, Request $request)
+    {
+        $card = new Models\Card;
+
+        $deck = Models\Deck::find($deckId);
+
+        $this->save($card, $request, $deck);
+
+        return redirect()->to('/my_decks/' . $deck->id);
+    }
 
 
     public function save(Models\Card $card, Request $request, $deck)
     {
-        $deck->id;
+        $this->validate(request(),[
+
+            'question' => 'required',
+
+            'answer' => 'required'
+        ]);
+
         $card->fill(
             [
                 'question' => $request->input('question'),
@@ -96,34 +97,50 @@ class CardsController extends Controller
 
     }
 
-    public function edit($id)
+
+    public function edit($deckId, $cardId)
     {
-        //
+        $method = "PUT";
+
+        $action = "/my_decks/" . $deckId . "/card/" . $cardId;
+
+        $submit_text = "Update Card";
+
+        return view('cards.edit', compact( 'method', 'action', 'submit_text', 'deckId', 'cardId'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
+
+    public function update($deckId, $cardId)
     {
-        //
+        $deck = Models\Deck::where('user_id', auth()->user()->id)->where('id', $deckId)->first();
+
+        $card = Models\Card::find($cardId);
+
+        $card->question = request('question');
+
+        $card->answer = request('answer');
+
+        $card->save();
+
+        return redirect()->to('/my_decks/' . $deck->id);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
 
-
-
-    public function destroy($id)
+    public function delete($deckId, $cardId)
     {
-        //
+        $deck = Models\Deck::where('user_id', auth()->user()->id)->where('id', $deckId)->first();
+
+        $card = Models\Card::find($cardId);
+
+        return view('cards.delete', compact('deck', 'card'));
+    }
+
+
+    public function destroy($deckId, $cardId)
+    {
+
+        Models\Card::find($cardId)->delete();
+
+        return redirect()->to('my_decks/' . $deckId);
     }
 }

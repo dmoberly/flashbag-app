@@ -1,3 +1,4 @@
+<!--
 @extends ('layouts.master')
 @section ('content')
     <section class="jumbotron text-center">
@@ -29,4 +30,4 @@
         <button type="submit" class="btn btn-primary">Login</button>
     </form>
 
-@endsection
+@endsection-->

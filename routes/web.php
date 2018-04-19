@@ -13,17 +13,24 @@
 
 Route::get('/', 'FeaturedController@index');
 
-Route::resource('register', 'Auth\RegisterController');
+Route::middleware('auth')->group(function () {
 
-Route::resource('login', 'Auth\LoginController');
+    Route::resource('my_decks', 'DecksController');
 
-Route::resource('my_decks', 'DecksController');
+    Route::resource('my_decks/{deckId}/card', 'Decks\CardsController');
 
-Route::resource('my_decks/{deckId}/cards', 'Decks\CardsController');
+    Route::get('my_decks/{deckId}/delete', 'DecksController@delete')->name('delete');
+
+    Route::get('my_decks/{deckId}/card/{cardId}/delete', 'Decks\CardsController@delete')->name('delete');
+
+    Route::get('/my_decks/{deckId}/results', 'DecksController@results');
+
+    Route::get('/my_decks/{deckId}/card/{cardId}/toggle-review', 'Decks\CardsController@toggleReview');
 
 
+});
 
+Auth::routes();
 
-
-
+Route::get('/home', 'HomeController@index')->name('home');
 
